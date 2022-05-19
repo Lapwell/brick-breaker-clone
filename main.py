@@ -1,4 +1,5 @@
 import pygame
+import time
 import sys
 
 pygame.init()
@@ -6,16 +7,23 @@ pygame.init()
 # Colours
 BLACK = 0, 0, 0
 WHITE = 255, 255, 255
-RED = 64, 64, 255
-GREEN = 0, 128, 255
+RED = 255, 32, 32
+GREEN = 64, 255, 64
+BLUE = 0, 128, 255
 
 # Pygame related
 WIDTH, HEIGHT = 800, 600
 ROOT = pygame.display.set_mode((WIDTH, HEIGHT))
-FPS = 30
+FPS = 60
 VEL = 8
-FONT = pygame.font.Font(None, 24)
 clock = pygame.time.Clock()
+
+FONT = pygame.font.Font(None, 24)
+win_text = FONT.render('YOU WIN', False, GREEN)
+win_screen = win_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+game_over_text = FONT.render('GAME OVER', False, RED)
+game_over_screen = game_over_text.get_rect(center=(WIDTH / 2, HEIGHT / 2))
+
 
 brick_list = []
 border_list = []
@@ -47,6 +55,7 @@ class BallClass:
         self.rect.y += self.y_vel
 
 
+# This class is for the borders so the ball bounces off the egdes of the screen
 class BorderClass:
     def __init__(self, posx, posy, width, height):
         self.posx = posx
@@ -65,9 +74,29 @@ class BrickClass:
         self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
 
 
+def win():
+    while True:
+        ROOT.fill(BLACK)
+        ROOT.blit(win_text, win_screen)
+        pygame.display.update()
+        time.sleep(4)
+        pygame.quit()
+        sys.exit()
+
+
+def game_over():
+    while True:
+        ROOT.fill(BLACK)
+        ROOT.blit(game_over_text, game_over_screen)
+        pygame.display.update()
+        time.sleep(4)
+        pygame.quit()
+        sys.exit()
+
+
 def check_events():
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player.rect.x > 4:
+    if keys[pygame.K_LEFT] and player.rect.x > 8:
         player.rect.x -= player.vel
     if keys[pygame.K_RIGHT] and player.rect.x < WIDTH - player.length - 4:
         player.rect.x += player.vel
@@ -78,6 +107,9 @@ def check_events():
 
 
 def update_root():
+    if ball.rect.y > HEIGHT:
+        print('game over')
+        game_over()
     if ball.rect.colliderect(player.rect):
         ball.y_vel *= -1
     for item in brick_list:
@@ -91,7 +123,7 @@ def update_root():
             ball.x_vel *= -1
     ball.update_pos()
     ROOT.fill(BLACK)
-    pygame.draw.circle(ROOT, GREEN, (ball.rect[0], ball.rect[1]), ball.size)
+    pygame.draw.circle(ROOT, BLUE, (ball.rect[0], ball.rect[1]), ball.size)
     pygame.draw.rect(ROOT, WHITE, player.rect)
     pygame.display.update()
 
@@ -113,7 +145,7 @@ if __name__ == '__main__':
     player = PlayerClass(WIDTH - WIDTH / 2, HEIGHT - 50, VEL, 164, 12)
     top_border = BorderClass(0, 0, WIDTH, 20)
     right_border = BorderClass(WIDTH, 0, 20, HEIGHT)
-    left_border = BorderClass(-20, 0, 20, HEIGHT)
+    left_border = BorderClass(0, 0, 20, HEIGHT)
     border_list = [top_border, right_border, left_border]
     while True:
         main()
