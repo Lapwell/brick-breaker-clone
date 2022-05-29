@@ -12,7 +12,7 @@ GREEN = 64, 255, 64
 BLUE = 0, 128, 255
 
 # Pygame related
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 800, 800
 ROOT = pygame.display.set_mode((WIDTH, HEIGHT))
 FPS = 60
 VEL = 8
@@ -71,7 +71,11 @@ class BrickClass:
         self.posx = posx
         self.posy = posy
         self.size = size
-        self.rect = pygame.Rect(self.posx, self.posy, self.size, self.size)
+        self.rect = pygame.Rect(self.posx, self.posy, self.size * 3, self.size)
+
+
+def particles(posx, posy):
+    pass
 
 
 def win():
@@ -89,7 +93,7 @@ def game_over():
         ROOT.fill(BLACK)
         ROOT.blit(game_over_text, game_over_screen)
         pygame.display.update()
-        time.sleep(4)
+        time.sleep(2)
         pygame.quit()
         sys.exit()
 
@@ -107,14 +111,17 @@ def check_events():
 
 
 def update_root():
+    ROOT.fill(BLACK)
     if ball.rect.y > HEIGHT:
         print('game over')
         game_over()
     if ball.rect.colliderect(player.rect):
         ball.y_vel *= -1
     for item in brick_list:
+        pygame.draw.rect(ROOT, RED, item.rect)
         if ball.rect.colliderect(item.rect):
-            print('brick hit true')
+            ball.y_vel *= -1
+            brick_list.pop(brick_list.index(item))
     for item in border_list:
         if ball.rect.colliderect(item.rect):
             if item == border_list[0]:
@@ -122,8 +129,8 @@ def update_root():
                 ball.y_vel *= -1
             ball.x_vel *= -1
     ball.update_pos()
-    ROOT.fill(BLACK)
-    pygame.draw.circle(ROOT, BLUE, (ball.rect[0], ball.rect[1]), ball.size)
+    pygame.draw.circle(ROOT, BLUE, (ball.rect[0] + 12, ball.rect[1] + 12), ball.size / 1.5)
+    #pygame.draw.rect(ROOT, GREEN, ball.rect)
     pygame.draw.rect(ROOT, WHITE, player.rect)
     pygame.display.update()
 
@@ -141,11 +148,20 @@ def main():
 
 
 if __name__ == '__main__':
-    ball = BallClass(WIDTH // 2, HEIGHT // 2, 4, 4, 15)
+    ball = BallClass(WIDTH // 2, HEIGHT // 2, 4, 4, 24)
     player = PlayerClass(WIDTH - WIDTH / 2, HEIGHT - 50, VEL, 164, 12)
     top_border = BorderClass(0, 0, WIDTH, 20)
     right_border = BorderClass(WIDTH, 0, 20, HEIGHT)
     left_border = BorderClass(0, 0, 20, HEIGHT)
     border_list = [top_border, right_border, left_border]
+    posx, posy = 20, 40
+    for x in range(66):
+        print(posy)
+        brick_list.append(BrickClass(posx, posy, 20))
+        posx += 70
+        if x == 10 or x == 21 or x == 32 or x == 43 or x == 54:
+            posx = 20
+            posy += 40
+
     while True:
         main()
